@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Examen de Cálculo Diferencial — Primer Parcial (Derivadas)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --void:#0a0b10;
+    --void-2:#12141d;
+    --panel:#1a1d27;
+    --panel-2:#20242f;
+    --magneto:#3d4150;
+    --magneto-light:#565c6e;
+    --border:#2c2f3b;
+    --border-light:#3a3e4c;
+    --text:#e9ebf1;
+    --dim:#9aa0b2;
+    --violet:#8f7ff5;
+    --violet-dim:#6b5fc0;
+    --cyan:#7fdcf0;
+    --green:#4fdb96;
+    --red:#f56a6a;
+    --gold:#f0c26a;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;background:var(--void);color:var(--text);font-family:'Inter',sans-serif;}
+  body{min-height:100vh;position:relative;overflow-x:hidden;}
+
+  canvas#starfield{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;background:
+    radial-gradient(ellipse at 20% 10%, #1a1530 0%, transparent 45%),
+    radial-gradient(ellipse at 85% 80%, #10202e 0%, transparent 50%),
+    linear-gradient(180deg, #090a10 0%, #0d0f16 50%, #0a0b12 100%);}
+
+  .page{position:relative;z-index:1;max-width:1000px;margin:0 auto;padding:48px 24px 140px;}
+
+  header{text-align:center;margin-bottom:36px;}
+  .eyebrow{font-family:'JetBrains Mono',monospace;letter-spacing:.24em;font-size:11px;text-transform:uppercase;color:var(--cyan);opacity:.85;margin-bottom:14px;}
+  h1{font-family:'Space Grotesk',sans-serif;font-size:clamp(28px,5vw,44px);font-weight:700;margin:0 0 8px;letter-spacing:-.01em;
+     text-shadow:0 0 24px rgba(143,127,245,.35), 0 0 60px rgba(127,220,240,.12);}
+  header p.sub{color:var(--dim);font-size:15px;margin:0;font-family:'JetBrains Mono',monospace;}
+  .divider{width:120px;height:2px;margin:22px auto 0;background:linear-gradient(90deg,transparent,var(--violet),var(--cyan),transparent);
+    box-shadow:0 0 12px rgba(143,127,245,.6);}
+
+  .info-card{background:linear-gradient(160deg,var(--panel),var(--panel-2));border:1px solid var(--border-light);
+    border-radius:16px;padding:26px 28px;margin-bottom:22px;
+    box-shadow:0 0 0 1px rgba(255,255,255,.02) inset, 0 20px 40px -20px rgba(0,0,0,.6);}
+  .info-grid{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:18px;}
+  @media (max-width:680px){.info-grid{grid-template-columns:1fr;}}
+  .field label{display:block;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);margin-bottom:7px;font-family:'JetBrains Mono',monospace;}
+  .field input{width:100%;background:var(--void-2);border:1px solid var(--border);border-radius:9px;padding:11px 13px;
+    color:var(--text);font-size:15px;font-family:'Inter',sans-serif;transition:border-color .2s, box-shadow .2s;}
+  .field input:focus{outline:none;border-color:var(--violet);box-shadow:0 0 0 3px rgba(143,127,245,.18);}
+  .field .static{background:transparent;border:1px dashed var(--border);border-radius:9px;padding:11px 13px;color:var(--dim);font-size:14.5px;}
+  .badge-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px;}
+  .badge{font-family:'JetBrains Mono',monospace;font-size:11.5px;padding:6px 12px;border-radius:100px;
+    background:var(--void-2);border:1px solid var(--border);color:var(--dim);}
+  .badge b{color:var(--cyan);font-weight:500;}
+
+  .instructions{background:var(--panel);border:1px solid var(--border);border-left:3px solid var(--violet);
+    border-radius:0 12px 12px 0;padding:16px 20px;margin-bottom:32px;font-size:14.5px;color:var(--dim);line-height:1.6;}
+  .instructions strong{color:var(--text);}
+
+  .questions-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;}
+  @media (max-width:720px){.questions-grid{grid-template-columns:1fr;}}
+
+  .cat-header{grid-column:1/-1;display:flex;align-items:center;gap:12px;margin:26px 0 4px;}
+  .cat-header:first-child{margin-top:0;}
+  .cat-header .line{flex:1;height:1px;background:var(--border-light);}
+  .cat-header span{font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);white-space:nowrap;}
+
+  .q-card{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:18px 18px 16px;
+    transition:border-color .2s, transform .15s;position:relative;}
+  .q-card:hover{border-color:var(--border-light);}
+  .q-card.answered{border-color:rgba(143,127,245,.35);}
+  .q-num{position:absolute;top:-11px;left:16px;width:26px;height:26px;border-radius:50%;
+    background:radial-gradient(circle at 30% 30%, var(--violet), var(--violet-dim));
+    display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;
+    font-size:12px;font-weight:600;color:#fff;box-shadow:0 0 12px rgba(143,127,245,.5);}
+  .q-card.bonus .q-num{background:radial-gradient(circle at 30% 30%, var(--gold), #c99a3a);}
+  .q-expr{font-family:'JetBrains Mono',monospace;font-size:16.5px;padding:14px 4px 4px;color:var(--text);
+    display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+  .q-hint{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--dim);padding:0 4px 10px;}
+  .frac{display:inline-flex;flex-direction:column;text-align:center;vertical-align:middle;line-height:1.15;margin:0 2px;}
+  .frac .num{border-bottom:1.4px solid currentColor;padding:0 5px 2px;}
+  .frac .den{padding:2px 5px 0;}
+  .radical::before{content:"√";font-size:1.15em;margin-right:1px;}
+  .radical{display:inline-flex;align-items:center;}
+  .radical .inside{border-top:1.4px solid currentColor;padding:2px 3px 0;}
+
+  .options{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px;}
+  .opt{position:relative;}
+  .opt input{position:absolute;opacity:0;width:0;height:0;}
+  .opt label{display:flex;align-items:center;gap:8px;background:var(--void-2);border:1px solid var(--border);
+    border-radius:9px;padding:9px 11px;font-family:'JetBrains Mono',monospace;font-size:13px;cursor:pointer;
+    transition:all .15s;color:var(--dim);}
+  .opt label .letter{width:18px;height:18px;border-radius:50%;border:1px solid var(--magneto-light);
+    display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0;color:var(--dim);}
+  .opt input:checked + label{background:rgba(143,127,245,.12);border-color:var(--violet);color:var(--text);}
+  .opt input:checked + label .letter{background:var(--violet);border-color:var(--violet);color:#fff;}
+  .opt label:hover{border-color:var(--border-light);}
+
+  .open-input{width:100%;background:var(--void-2);border:1px solid var(--border);border-radius:9px;
+    padding:11px 13px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:14.5px;margin-top:6px;
+    transition:border-color .2s, box-shadow .2s;}
+  .open-input:focus{outline:none;border-color:var(--violet);box-shadow:0 0 0 3px rgba(143,127,245,.18);}
+  .open-answer-reveal{display:none;font-family:'JetBrains Mono',monospace;font-size:12.5px;margin-top:8px;padding:8px 10px;
+    border-radius:8px;background:var(--void-2);border:1px solid var(--border);}
+
+  .q-card.correct{border-color:rgba(79,219,150,.5);}
+  .q-card.incorrect{border-color:rgba(245,106,106,.5);}
+  .q-card.correct .open-input{border-color:var(--green);box-shadow:0 0 0 3px rgba(79,219,150,.14);}
+  .q-card.incorrect .open-input{border-color:var(--red);box-shadow:0 0 0 3px rgba(245,106,106,.14);}
+  .q-card.correct .open-answer-reveal, .q-card.incorrect .open-answer-reveal{display:block;}
+  .opt.is-correct label{background:rgba(79,219,150,.14);border-color:var(--green);color:var(--text);}
+  .opt.is-correct label .letter{background:var(--green);border-color:var(--green);color:#0a0b10;}
+  .opt.is-wrong label{background:rgba(245,106,106,.14);border-color:var(--red);color:var(--text);}
+  .opt.is-wrong label .letter{background:var(--red);border-color:var(--red);color:#0a0b10;}
+
+  .bottom-bar{position:fixed;bottom:0;left:0;width:100%;z-index:5;
+    background:linear-gradient(180deg,rgba(10,11,16,0),rgba(10,11,16,.96) 40%);padding:22px 0 26px;}
+  .bottom-inner{max-width:1000px;margin:0 auto;padding:0 24px;display:flex;align-items:center;gap:18px;
+    background:linear-gradient(160deg,var(--panel),var(--panel-2));border:1px solid var(--border-light);
+    border-radius:16px;padding:14px 20px;box-shadow:0 20px 50px -10px rgba(0,0,0,.7);}
+  .progress-wrap{flex:1;}
+  .progress-label{font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--dim);margin-bottom:6px;display:flex;justify-content:space-between;}
+  .progress-track{height:6px;border-radius:100px;background:var(--void-2);overflow:hidden;}
+  .progress-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--violet),var(--cyan));transition:width .3s;box-shadow:0 0 10px rgba(143,127,245,.6);}
+  #submitBtn{flex-shrink:0;background:linear-gradient(135deg,var(--violet),#6f62d8);color:#fff;border:none;
+    padding:13px 26px;border-radius:11px;font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:15px;
+    cursor:pointer;box-shadow:0 8px 24px -6px rgba(143,127,245,.6);transition:transform .15s, box-shadow .15s;}
+  #submitBtn:hover{transform:translateY(-1px);box-shadow:0 12px 28px -6px rgba(143,127,245,.75);}
+  #submitBtn:active{transform:translateY(0);}
+
+  .result-overlay{position:fixed;inset:0;background:rgba(6,7,11,.82);backdrop-filter:blur(6px);
+    display:none;align-items:center;justify-content:center;z-index:20;padding:24px;overflow-y:auto;}
+  .result-overlay.show{display:flex;}
+  .result-card{max-width:480px;width:100%;background:linear-gradient(160deg,var(--panel),var(--panel-2));
+    border:1px solid var(--border-light);border-radius:20px;padding:36px 32px;text-align:center;
+    box-shadow:0 40px 100px -30px rgba(0,0,0,.9), 0 0 0 1px rgba(255,255,255,.03) inset;
+    animation:pop .35s ease;margin:auto;}
+  @keyframes pop{from{opacity:0;transform:scale(.94) translateY(8px);}to{opacity:1;transform:scale(1) translateY(0);}}
+  .result-eyebrow{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--cyan);margin-bottom:10px;}
+  .result-name{font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:600;margin-bottom:22px;}
+  .grade-ring{width:150px;height:150px;margin:0 auto 20px;position:relative;}
+  .grade-ring svg{transform:rotate(-90deg);}
+  .grade-ring .bg{fill:none;stroke:var(--void-2);stroke-width:10;}
+  .grade-ring .fg{fill:none;stroke-width:10;stroke-linecap:round;transition:stroke-dashoffset 1s cubic-bezier(.4,0,.2,1);}
+  .grade-num{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+  .grade-num .n{font-family:'Space Grotesk',sans-serif;font-size:36px;font-weight:700;}
+  .grade-num .d{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--dim);margin-top:2px;}
+  .result-status{font-family:'JetBrains Mono',monospace;font-size:14px;padding:7px 18px;border-radius:100px;
+    display:inline-block;margin-bottom:18px;letter-spacing:.04em;}
+  .status-pass{background:rgba(79,219,150,.14);color:var(--green);border:1px solid rgba(79,219,150,.4);}
+  .status-fail{background:rgba(245,106,106,.14);color:var(--red);border:1px solid rgba(245,106,106,.4);}
+  .bonus-note{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--gold);margin-bottom:10px;}
+  .breakdown{text-align:left;margin:22px 0;padding-top:18px;border-top:1px solid var(--border);}
+  .breakdown-row{display:flex;justify-content:space-between;align-items:center;font-size:13px;padding:7px 0;color:var(--dim);}
+  .breakdown-row b{color:var(--text);font-weight:500;}
+  .breakdown-row .bar{flex:1;height:5px;background:var(--void-2);border-radius:100px;margin:0 12px;overflow:hidden;}
+  .breakdown-row .bar i{display:block;height:100%;background:linear-gradient(90deg,var(--violet),var(--cyan));}
+  .result-actions{display:flex;gap:10px;margin-top:22px;}
+  .result-actions button{flex:1;padding:12px;border-radius:10px;font-family:'Space Grotesk',sans-serif;font-weight:600;
+    font-size:14px;cursor:pointer;border:1px solid var(--border-light);}
+  #reviewBtn{background:transparent;color:var(--text);}
+  #reviewBtn:hover{border-color:var(--violet);}
+  #closeResultBtn{background:var(--violet);color:#fff;border:none;}
+
+  .missing-warning{color:var(--gold);font-family:'JetBrains Mono',monospace;font-size:12px;margin-top:10px;display:none;}
+</style>
+</head>
+<body>
+
+<canvas id="starfield"></canvas>
+
+<div class="page">
+  <header>
+    <div class="eyebrow">Campus Tlaquepaque · Academia de Matemáticas</div>
+    <h1>Examen de Cálculo Diferencial</h1>
+    <p class="sub">Primer Parcial · Reglas de Derivación — Ciclo 1C-2026</p>
+    <div class="divider"></div>
+  </header>
+
+  <div class="info-card">
+    <div class="info-grid">
+      <div class="field">
+        <label for="nombre">Nombre del alumno</label>
+        <input type="text" id="nombre" placeholder="Escribe tu nombre completo" autocomplete="off">
+      </div>
+      <div class="field">
+        <label>Materia</label>
+        <div class="static">Cálculo diferencial</div>
+      </div>
+      <div class="field">
+        <label>Cuatrimestre</label>
+        <div class="static">Quinto</div>
+      </div>
+    </div>
+    <div class="badge-row">
+      <span class="badge">Docente: <b>Rafael Páez</b></span>
+      <span class="badge">Academia: <b>Matemáticas</b></span>
+      <span class="badge">Ponderación: <b>80% primer parcial</b></span>
+      <span class="badge" id="fechaBadge">Fecha: <b>—</b></span>
+    </div>
+  </div>
+
+  <div class="instructions">
+    <strong>Instrucciones:</strong> resuelve por medio de los métodos de derivadas. Las preguntas 1 a 32 son de opción
+    múltiple; las preguntas 33 a 39 son de respuesta abierta (escribe la derivada tal como la simplificarías).
+    Al final hay un punto extra. Presiona <strong>«Enviar examen»</strong> para calificar automáticamente.
+  </div>
+
+  <form id="examForm">
+    <div class="questions-grid" id="questionsGrid"></div>
+  </form>
+</div>
+
+<div class="bottom-bar">
+  <div class="bottom-inner">
+    <div class="progress-wrap">
+      <div class="progress-label"><span id="progressText">0 de 39 respondidas</span><span id="progressPct">0%</span></div>
+      <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+      <div class="missing-warning" id="missingWarning">Escribe tu nombre para poder enviar el examen.</div>
+    </div>
+    <button id="submitBtn" type="button">Enviar examen</button>
+  </div>
+</div>
+
+<div class="result-overlay" id="resultOverlay">
+  <div class="result-card">
+    <div class="result-eyebrow">Resultado del examen</div>
+    <div class="result-name" id="resultName">—</div>
+    <div class="grade-ring">
+      <svg width="150" height="150" viewBox="0 0 150 150">
+        <circle class="bg" cx="75" cy="75" r="62"></circle>
+        <circle class="fg" id="gradeArc" cx="75" cy="75" r="62" stroke="#8f7ff5"
+          stroke-dasharray="389.6" stroke-dashoffset="389.6"></circle>
+      </svg>
+      <div class="grade-num"><span class="n" id="gradeNum">0.0</span><span class="d">de 10</span></div>
+    </div>
+    <div id="resultStatus" class="result-status status-fail">—</div>
+    <div style="color:var(--dim);font-size:13.5px;font-family:'JetBrains Mono',monospace;" id="resultRaw">0 / 39 correctas</div>
+    <div class="bonus-note" id="bonusNote" style="display:none;">✦ Punto extra conseguido</div>
+
+    <div class="breakdown" id="breakdown"></div>
+
+    <div class="result-actions">
+      <button id="reviewBtn" type="button">Revisar respuestas</button>
+      <button id="closeResultBtn" type="button">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ---------------- STARFIELD ---------------- */
+(function(){
+  const canvas = document.getElementById('starfield');
+  const ctx = canvas.getContext('2d');
+  let stars = [];
+  function resize(){
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    const count = Math.floor((canvas.width*canvas.height)/9000);
+    stars = Array.from({length:count}, ()=>({
+      x:Math.random()*canvas.width,
+      y:Math.random()*canvas.height,
+      r:Math.random()*1.3+0.3,
+      phase:Math.random()*Math.PI*2,
+      speed:Math.random()*0.015+0.005,
+      hue: Math.random()<0.15 ? '143,127,245' : (Math.random()<0.3 ? '127,220,240' : '255,255,255')
+    }));
+  }
+  function tick(t){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    stars.forEach(s=>{
+      const alpha = 0.35 + 0.65*Math.abs(Math.sin(s.phase + t*s.speed));
+      ctx.beginPath();
+      ctx.arc(s.x,s.y,s.r,0,Math.PI*2);
+      ctx.fillStyle = `rgba(${s.hue},${alpha})`;
+      ctx.fill();
+    });
+    requestAnimationFrame(tick);
+  }
+  window.addEventListener('resize', resize);
+  resize();
+  requestAnimationFrame(tick);
+})();
+
+/* ---------------- FECHA ---------------- */
+document.getElementById('fechaBadge').innerHTML =
+  'Fecha: <b>' + new Date().toLocaleDateString('es-MX', {year:'numeric', month:'long', day:'numeric'}) + '</b>';
+
+/* ---------------- HELPERS ---------------- */
+const F = (num,den) => `<span class="frac"><span class="num">${num}</span><span class="den">${den}</span></span>`;
+const R = (inside) => `<span class="radical"><span class="inside">${inside}</span></span>`;
+
+/* ---------------- CATEGORÍAS ---------------- */
+const categories = [
+  { name: "Regla de potencia y polinomios", range: [1,8] },
+  { name: "Funciones exponenciales", range: [9,11] },
+  { name: "Funciones logarítmicas", range: [12,15] },
+  { name: "Funciones trigonométricas (regla de la cadena)", range: [16,24] },
+  { name: "Logaritmos y exponenciales avanzadas", range: [25,28] },
+  { name: "Funciones lineales y constantes", range: [29,32] },
+  { name: "Respuesta abierta: cadena y potencias racionales", range: [33,39] },
+];
+
+/* ---------------- BANCO DE REACTIVOS ---------------- */
+const questions = [
+  // 1-8 · Regla de potencia y polinomios
+  { type:'mc', expr:'F(x) = 9', opts:['0','1','9','1 + x'], correct:0 },
+  { type:'mc', expr:'F(x) = 3x<sup>5</sup>', opts:['15x<sup>4</sup>','5x<sup>5</sup>','15x<sup>5</sup>','3x<sup>5</sup> + 15'], correct:0 },
+  { type:'mc', expr:'F(x) = x<sup>8</sup>', opts:['7x<sup>6</sup>','8x<sup>7</sup>','8x<sup>6</sup>','x<sup>7</sup>'], correct:1 },
+  { type:'mc', expr:'F(x) = 6x<sup>7</sup>', opts:['42x<sup>6</sup>','13x<sup>6</sup>','6x<sup>6</sup>','42x<sup>7</sup>'], correct:0 },
+  { type:'mc', expr:`F(x) = ${F('7','3')}x<sup>3</sup>`, opts:['7x<sup>3</sup>', F('7','3')+'x<sup>2</sup>', '7x<sup>2</sup>', '3x<sup>2</sup>'], correct:2 },
+  { type:'mc', expr:'F(x) = 12x<sup>2</sup> + 15', opts:['24x + 15','12x','24x','6x<sup>4</sup>'], correct:2 },
+  { type:'mc', expr:`F(x) = ${F('1','4')}x<sup>4</sup> + ${F('2','7')}`, opts:['4x<sup>3</sup> + 2/7','x<sup>3</sup>','4x + 2/7','x<sup>4</sup>'], correct:1 },
+  { type:'mc', expr:'F(x) = x<sup>3</sup> − 2x<sup>2</sup> + 4x − 5', opts:['3x<sup>2</sup> − 4x + 4','x<sup>2</sup> − 4x − 4','3x<sup>2</sup> + 4x − 4','3x<sup>2</sup> − 4x − 5'], correct:0 },
+
+  // 9-11 · Funciones exponenciales
+  { type:'mc', expr:'f(x) = e<sup>4x<sup>3</sup></sup>', opts:['12x<sup>2</sup>e<sup>4x<sup>3</sup></sup>','4x<sup>2</sup>e<sup>4x<sup>3</sup></sup>','12x<sup>3</sup>e<sup>4x<sup>2</sup></sup>','12e<sup>4x<sup>3</sup></sup>'], correct:0 },
+  { type:'mc', expr:'f(x) = e<sup>2x</sup> + e<sup>x</sup>', opts:['2e<sup>3x</sup>','e<sup>2x</sup> + e<sup>x</sup>','2e<sup>2x</sup> + e<sup>x</sup>','2xe<sup>2x</sup> + e<sup>x</sup>'], correct:2 },
+  { type:'mc', expr:'f(x) = 3e<sup>x<sup>4</sup></sup>', opts:['12x<sup>3</sup>e<sup>x<sup>4</sup></sup>','12e<sup>x<sup>4</sup></sup>','3e<sup>x<sup>4</sup></sup>','4x<sup>3</sup>e<sup>x<sup>4</sup></sup>'], correct:0 },
+
+  // 12-15 · Funciones logarítmicas
+  { type:'mc', expr:'f(x) = ln(x<sup>5</sup>)', opts:['1/x','5/x','X','5x/x'], correct:1 },
+  { type:'mc', expr:'f(x) = ln(6x + 1)', opts:['6/(x + 6)','6/2','6/(6x + 1)','2x/(x + 6)'], correct:2 },
+  { type:'mc', expr:'f(x) = ln(8x)', opts:['8/x','1/x','X','4/x'], correct:1 },
+  { type:'mc', expr:'f(x) = ln(e<sup>3x</sup>)', opts:['3','1/e<sup>3x</sup>','9','e<sup>3x</sup>/x'], correct:0 },
+
+  // 16-24 · Trigonométricas (cadena)
+  { type:'mc', expr:'f(x) = sen(4x)', opts:['4cos(16x)','8cos(4x)','4cos(4x)','4xsen(4x)'], correct:2 },
+  { type:'mc', expr:'F(x) = Cos(6x<sup>2</sup>)', opts:['−12xSen(6x<sup>2</sup>)','−6xSen(6x<sup>2</sup>)','−12Cos(6x<sup>2</sup>)','−12Sen(6x<sup>2</sup>)'], correct:0 },
+  { type:'mc', expr:'F(x) = 5Cos(3x)', opts:['−15Sen(3x)','−5xSen(3)','−15Cos(3x)','−xSen(3x)'], correct:0 },
+  { type:'mc', expr:'F(x) = Tan(5x)', opts:['5sec<sup>2</sup>(5x)','5sec<sup>2</sup>(x)','−5Cos(5x)','5tan(5x)'], correct:0 },
+  { type:'mc', expr:'F(x) = Sec(3x)', opts:['sec(3x)tan(3x)','3sec(3x)tan(6x)','tan(3x)','3sec(3x)tan(3x)'], correct:3 },
+  { type:'mc', expr:'F(x) = Sen(2x<sup>3</sup>)', opts:['−6xSen(2x<sup>2</sup>)','6x<sup>2</sup>Cos(2x<sup>3</sup>)','−6Cos(2x<sup>3</sup>)','6x<sup>3</sup>Cos(2x<sup>3</sup>)'], correct:1 },
+  { type:'mc', expr:'F(x) = −Cos(x)', opts:['Cos(x)','Sen(x)','−Cos(x)','−Sen(x)'], correct:1 },
+  { type:'mc', expr:'F(x) = −Sen(9x<sup>2</sup>)', opts:['18Cos(9x)','−18xCos(9x<sup>2</sup>)','18sen(9x<sup>2</sup>)','−9xCos(9x<sup>2</sup>)'], correct:1 },
+  { type:'mc', expr:'F(x) = 3Cos(3x<sup>2</sup>) + 3x<sup>2</sup>', opts:['−18xSen(3x<sup>2</sup>) + 6x','−9sen(3x) + 6x','9sen(3x<sup>2</sup>) + 6x','−18sen(x<sup>2</sup>) + 3x'], correct:0 },
+
+  // 25-28 · Logaritmos y exponenciales avanzadas
+  { type:'mc', expr:'f(x) = log<sub>3</sub>(5x)', opts:['5/x', F('1','x·ln3'), '1/x','Ln(5x + 3)'], correct:1 },
+  { type:'mc', expr:'f(x) = ln(4x<sup>2</sup>)', opts:['4/x','2/x','4','1/x'], correct:1 },
+  { type:'mc', expr:'f(x) = ln(cos x)', opts:[F('−sen(x)','cos(x)'), F('cos(x)','sen(x)'), 'sen(x)', '−sen(x) − cos(x)'], correct:0 },
+  { type:'mc', expr:'f(x) = 5e<sup>x<sup>2</sup></sup>', opts:['20e<sup>x<sup>2</sup></sup>','10x','5xe<sup>x<sup>2</sup></sup>','10xe<sup>x<sup>2</sup></sup>'], correct:3 },
+
+  // 29-32 · Funciones lineales y constantes
+  { type:'mc', expr:`F(x) = ${R('36')}·x`, opts:['6','1','0','36'], correct:0 },
+  { type:'mc', expr:'f(x) = 20x', opts:['20','1','5','x'], correct:0 },
+  { type:'mc', expr:'f(x) = 9x + 27', opts:['9','0','27','36'], correct:0 },
+  { type:'mc', expr:'f(x) = 45π', opts:['45','1','0','π'], correct:2 },
+
+  // 33-39 · Respuesta abierta
+  { type:'open', expr:'F(x) = x<sup>3</sup> + 7x<sup>2</sup>', placeholder:'Ej. 3x^2 + 14x', accept:['3x^2+14x'] },
+  { type:'open', expr:'F(x) = x<sup>5/2</sup>', placeholder:'Ej. (5/2)x^(3/2)', accept:['5/2x^3/2','(5/2)x^(3/2)','2.5x^1.5','2.5x^(3/2)'] },
+  { type:'open', expr:'F(x) = (x + 6)<sup>4</sup>', placeholder:'Ej. 4(x + 6)^3', accept:['4(x+6)^3'] },
+  { type:'open', expr:'F(x) = (3x − 5)<sup>2</sup>', placeholder:'Ej. 6(3x − 5)', accept:['6(3x-5)','18x-30'] },
+  { type:'open', expr:`F(x) = ${F('1','x<sup>3</sup>')}`, placeholder:'Ej. −3/x^4', accept:['-3/x^4','-3x^-4'] },
+  { type:'open', expr:`F(x) = ${F('5','x<sup>2</sup>')}`, placeholder:'Ej. −10/x^3', accept:['-10/x^3','-10x^-3'] },
+  { type:'open', expr:'F(x) = 8x<sup>5/4</sup>', placeholder:'Ej. 10x^(1/4)', accept:['10x^1/4','10x^(1/4)','10x^0.25'] },
+];
+
+const BONUS_TEXT = 'PUNTO EXTRA: escribe algo tipo "No supe derivar tu cariño 💔"';
+
+/* ---------------- NORMALIZACIÓN DE RESPUESTA ABIERTA ---------------- */
+function normalizeAnswer(s){
+  return s.toLowerCase()
+    .replace(/\s+/g,'')
+    .replace(/−/g,'-')
+    .replace(/,/g,'.')
+    .replace(/\*/g,'')
+    .replace(/²/g,'^2').replace(/³/g,'^3').replace(/¹/g,'^1');
+}
+
+/* ---------------- RENDER ---------------- */
+const grid = document.getElementById('questionsGrid');
+const letters = ['A','B','C','D'];
+
+questions.forEach((q, i)=>{
+  const n = i+1;
+  const cat = categories.find(c => n === c.range[0]);
+  if(cat){
+    const h = document.createElement('div');
+    h.className = 'cat-header';
+    h.innerHTML = `<span>${cat.name}</span><div class="line"></div>`;
+    grid.appendChild(h);
+  }
+
+  const card = document.createElement('div');
+  card.className = 'q-card';
+  card.dataset.index = i;
+
+  if(q.type === 'mc'){
+    const optsHtml = q.opts.map((opt, oi)=>`
+      <div class="opt" data-oi="${oi}">
+        <input type="radio" name="q${i}" id="q${i}o${oi}" value="${oi}">
+        <label for="q${i}o${oi}"><span class="letter">${letters[oi]}</span>${opt}</label>
+      </div>
+    `).join('');
+    card.innerHTML = `
+      <div class="q-num">${n}</div>
+      <div class="q-expr">${q.expr}</div>
+      <div class="q-hint">Encuentra F'(x)</div>
+      <div class="options">${optsHtml}</div>
+    `;
+  } else {
+    card.innerHTML = `
+      <div class="q-num">${n}</div>
+      <div class="q-expr">${q.expr}</div>
+      <div class="q-hint">Escribe F'(x) simplificada</div>
+      <input type="text" class="open-input" id="q${i}open" placeholder="${q.placeholder}" autocomplete="off">
+      <div class="open-answer-reveal" id="q${i}reveal"></div>
+    `;
+  }
+  grid.appendChild(card);
+});
+
+// Bonus card
+const bonusCard = document.createElement('div');
+bonusCard.className = 'q-card bonus';
+bonusCard.innerHTML = `
+  <div class="q-num">✦</div>
+  <div class="q-expr" style="font-family:'Inter',sans-serif;font-size:15px;">${BONUS_TEXT}</div>
+  <input type="text" class="open-input" id="bonusInput" placeholder="Escribe aquí..." autocomplete="off">
+`;
+grid.appendChild(bonusCard);
+
+/* ---------------- PROGRESO ---------------- */
+const form = document.getElementById('examForm');
+function isAnswered(q, i){
+  if(q.type === 'mc') return !!form.querySelector(`input[name="q${i}"]:checked`);
+  const el = document.getElementById(`q${i}open`);
+  return el && el.value.trim().length > 0;
+}
+function updateProgress(){
+  const answered = questions.filter((q,i)=>isAnswered(q,i)).length;
+  document.getElementById('progressText').textContent = `${answered} de ${questions.length} respondidas`;
+  const pct = Math.round((answered/questions.length)*100);
+  document.getElementById('progressPct').textContent = pct + '%';
+  document.getElementById('progressFill').style.width = pct + '%';
+  questions.forEach((q,i)=>{
+    const card = grid.querySelector(`.q-card[data-index="${i}"]`);
+    card.classList.toggle('answered', isAnswered(q,i));
+  });
+}
+form.addEventListener('change', updateProgress);
+form.addEventListener('input', updateProgress);
+updateProgress();
+
+/* ---------------- CALIFICAR ---------------- */
+const overlay = document.getElementById('resultOverlay');
+const CIRC = 2*Math.PI*62;
+
+function grade(){
+  const nombre = document.getElementById('nombre').value.trim();
+  const warning = document.getElementById('missingWarning');
+  if(!nombre){
+    warning.style.display = 'block';
+    document.getElementById('nombre').focus();
+    return;
+  }
+  warning.style.display = 'none';
+
+  let correctCount = 0;
+  const catResults = categories.map(c => ({ name: c.name, total: c.range[1]-c.range[0]+1, correct: 0 }));
+
+  questions.forEach((q,i)=>{
+    const card = grid.querySelector(`.q-card[data-index="${i}"]`);
+    card.classList.remove('correct','incorrect');
+
+    let isCorrect = false;
+    if(q.type === 'mc'){
+      card.querySelectorAll('.opt').forEach(o=>o.classList.remove('is-correct','is-wrong'));
+      const checked = form.querySelector(`input[name="q${i}"]:checked`);
+      const val = checked ? parseInt(checked.value) : -1;
+      isCorrect = val === q.correct;
+      card.querySelector(`.opt[data-oi="${q.correct}"]`).classList.add('is-correct');
+      if(checked && !isCorrect){
+        card.querySelector(`.opt[data-oi="${val}"]`).classList.add('is-wrong');
+      }
+    } else {
+      const el = document.getElementById(`q${i}open`);
+      const userVal = normalizeAnswer(el.value || '');
+      isCorrect = q.accept.some(a => normalizeAnswer(a) === userVal);
+      const reveal = document.getElementById(`q${i}reveal`);
+      reveal.textContent = 'Respuesta esperada: ' + q.accept[0].replace(/\^/g,'^');
+    }
+
+    if(isCorrect){
+      correctCount++;
+      card.classList.add('correct');
+      const cat = categories.find(c => (i+1) >= c.range[0] && (i+1) <= c.range[1]);
+      catResults.find(r=>r.name===cat.name).correct++;
+    } else {
+      card.classList.add('incorrect');
+    }
+  });
+
+  const bonusFilled = document.getElementById('bonusInput').value.trim().length > 0;
+
+  let gradeValue = (correctCount/questions.length)*10;
+  if(bonusFilled) gradeValue = Math.min(10, gradeValue + 0.2);
+  const pass = gradeValue >= 6;
+
+  document.getElementById('resultName').textContent = nombre;
+  document.getElementById('gradeNum').textContent = gradeValue.toFixed(1);
+  document.getElementById('resultRaw').textContent = `${correctCount} / ${questions.length} correctas`;
+  document.getElementById('bonusNote').style.display = bonusFilled ? 'block' : 'none';
+  const statusEl = document.getElementById('resultStatus');
+  statusEl.textContent = pass ? 'APROBADO' : 'NO APROBADO';
+  statusEl.className = 'result-status ' + (pass ? 'status-pass' : 'status-fail');
+
+  const arc = document.getElementById('gradeArc');
+  arc.setAttribute('stroke-dasharray', CIRC.toFixed(1));
+  arc.style.stroke = pass ? '#4fdb96' : '#8f7ff5';
+  const offset = CIRC - (CIRC * (gradeValue/10));
+  requestAnimationFrame(()=>{ arc.style.strokeDashoffset = offset.toFixed(1); });
+
+  const breakdown = document.getElementById('breakdown');
+  breakdown.innerHTML = catResults.map(r=>{
+    const pct = Math.round((r.correct/r.total)*100);
+    return `<div class="breakdown-row">
+      <b>${r.name}</b>
+      <div class="bar"><i style="width:${pct}%"></i></div>
+      <span>${r.correct}/${r.total}</span>
+    </div>`;
+  }).join('');
+
+  overlay.classList.add('show');
+}
+
+document.getElementById('submitBtn').addEventListener('click', grade);
+document.getElementById('closeResultBtn').addEventListener('click', ()=> overlay.classList.remove('show'));
+document.getElementById('reviewBtn').addEventListener('click', ()=>{
+  overlay.classList.remove('show');
+  document.querySelector('.q-card.incorrect, .q-card.correct')?.scrollIntoView({behavior:'smooth', block:'center'});
+});
+</script>
+
+</body>
+</html>
